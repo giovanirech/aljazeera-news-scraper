@@ -309,57 +309,111 @@ class NewsScraper(CustomSelenium):
         zip_path = make_archive(self.output_dir, "zip", self.output_dir)
         self.logger.info(f"Collection archived to {zip_path}.zip")
 
-
     def _get_web_element(
-        self, locator: str, locator_type: str = "xpath", parent: WebElement = None, multiple: bool = False
+        self,
+        locator: str,
+        locator_type: str = "xpath",
+        parent: WebElement = None,
+        multiple: bool = False,
+        explicit_wait: int = 0,
+        wait_condition: str = None,
     ) -> WebElement | list[WebElement]:
         """
-        Retrieves a web element (or elements) using the provided locator and locator type.
+        Retrieves a web element or a list of web elements using the specified locator strategy and criteria.
 
         Parameters
         ----------
         locator : str
-            The locator string used to identify the web element.
+            The locator string used to identify the web element(s).
         locator_type : str, optional
-            The type of locator to use ('xpath', 'id', 'class', 'name', or 'css'), default is 'xpath'.
+            The type of locator to use ('xpath', 'id', 'name', 'class', or 'css'), default is 'xpath'.
         parent : WebElement, optional
             The parent element to search within, default is None.
         multiple : bool, optional
             If True, retrieves a list of elements, default is False.
+        explicit_wait : int, optional
+            The maximum time to wait for the element(s), default is 0 (no wait).
+        wait_condition : str, optional
+            The condition to wait for ('presence' or 'clickable'), default is 'presence'.
 
         Returns
         -------
-        WebElement | list[WebElement]
+        WebElement or list of WebElement or None
             The found web element(s), or None if not found.
 
         Raises
         ------
         ValueError
-            If an unsupported locator type is provided.
+            If an unsupported locator type or wait condition is provided.
         """
+        parent = parent or self.driver
 
-        if not parent:
-            parent = self.driver
+        locator_types = {
+            "id": By.ID,
+            "xpath": By.XPATH,
+            "name": By.NAME,
+            "class": By.CLASS_NAME,
+            "css": By.CSS_SELECTOR,
+        }
 
-        if multiple:
-            method_to_use = parent.find_elements
-        else:
-            method_to_use = parent.find_element
+        by = locator_types.get(locator_type)
+        if by is None:
+            raise ValueError(f"Unsupported locator type '{locator_type}'.")
+
+        valid_wait_conditions = [None, "presence", "clickable"]
+        if wait_condition not in valid_wait_conditions:
+            raise ValueError(
+                f"Invalid wait_condition '{wait_condition}'. Valid values are 'presence', 'clickable', or None."
+            )
+
+        wait_condition = wait_condition or "presence"
 
         try:
-            if locator_type == "id":
-                return method_to_use(By.ID, locator)
-            elif locator_type == "xpath":
-                return method_to_use(By.XPATH, locator)
-            elif locator_type == "name":
-                return method_to_use(By.NAME, locator)
-            elif locator_type == "class":
-                return method_to_use(By.CLASS_NAME, locator)
-            elif locator_type == "css":
-                return method_to_use(By.CSS_SELECTOR, locator)
+            if explicit_wait > 0:
+                condition = self._get_wait_condition(by, locator, wait_condition, multiple)
+                return WebDriverWait(parent, explicit_wait).until(condition)
             else:
-                raise ValueError(f"Locator type '{locator_type}' not supported.")
-        except NoSuchElementException:
+                if multiple:
+                    elements = parent.find_elements(by, locator)
+                    if not elements:
+                        raise NoSuchElementException
+                    return elements
+                else:
+                    return parent.find_element(by, locator)
+        except (TimeoutException, NoSuchElementException):
             self.logger.error(f"Element with locator '{locator}' not found.")
             return None
 
+
+
+    def _get_wait_condition(self, by: By, locator: str, wait_condition: str, multiple: bool) -> EC:
+        """
+        Determines the appropriate expected condition for WebDriverWait based on the wait condition and multiplicity.
+
+        Parameters
+        ----------
+        by : selenium.webdriver.common.by.By
+            The strategy to locate elements, such as By.ID, By.XPATH.
+        locator : str
+            The locator string used to identify the web element(s).
+        wait_condition : str
+            The condition to wait for ('presence' or 'clickable').
+        multiple : bool
+            If True, expects multiple elements to be located.
+
+        Returns
+        -------
+        selenium.webdriver.support.expected_conditions._Condition
+            The expected condition to be used with WebDriverWait.
+
+        Raises
+        ------
+        ValueError
+            If an unsupported wait condition is provided.
+        """
+        if wait_condition == "clickable":
+            return EC.element_to_be_clickable((by, locator))
+        elif wait_condition == "presence" and multiple:
+            return EC.presence_of_all_elements_located((by, locator))
+        else:
+            return EC.presence_of_element_located((by, locator))
