@@ -253,7 +253,8 @@ class NewsScraper(CustomSelenium):
         bool
             True if more articles were loaded, False otherwise.
         """
-        load_more_button = self._get_web_element("//button[@class='show-more-button grid-full-width']")
+        show_more_button_xpath = "//button[@class='show-more-button grid-full-width']"
+        load_more_button = self._get_web_element(show_more_button_xpath)
 
         if not load_more_button:
             self.logger.info("No 'Show more' button found.")
@@ -266,27 +267,10 @@ class NewsScraper(CustomSelenium):
         load_more_button.click()
         self.logger.info("Clicked 'Show more' button.")
 
-        # Explicitly wait for the page to load
-        self.explicitly_wait_for_show_more_button()
+        # Explicitly wait for the page to load (button reappears)
+        self._get_web_element(show_more_button_xpath, explicit_wait=20, wait_condition="presence")
 
         return True
-
-    def explicitly_wait_for_show_more_button(self, timeout: int = 10):
-        """
-        Waits for the "Show more" button to appear, indicating that more articles can be loaded.
-
-        Parameters
-        ----------
-        timeout : int, optional
-            Time to wait before timing out, default is 10 seconds.
-        """
-        try:
-            _ = WebDriverWait(self.driver, timeout).until(
-                EC.presence_of_element_located((By.XPATH, "//button[@class='show-more-button grid-full-width']"))
-            )
-        except TimeoutException:
-            self.logger.error("Show more button not found.")
-
 
     def create_report(self):
         """
