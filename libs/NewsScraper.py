@@ -297,6 +297,9 @@ class NewsScraper(CustomSelenium):
         report_file = self.output_dir / "report.xlsx"
         report_df = pd.DataFrame([vars(article) for article in self.articles])
         report_df = report_df[["title", "date", "description", "image_file_name", "matches_count", "has_money"]]
+        report_df.to_csv(self.output_dir / "report.csv", index=False)
+        # Convert date to string for Excel compatibility
+        report_df["date"] = report_df["date"].dt.strftime("%Y-%m-%d")
         report_df.to_excel(report_file, index=False)
 
 
