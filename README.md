@@ -33,6 +33,7 @@ This project aims to demonstrate the implementation of web scraping and RPA as p
 - 📁 **Report Generation**: Outputs a detailed CSV report of collected articles.
 - 🗄️ **Archiving**: Archives the scraped data (articles and images) into a ZIP file for easy sharing.
 - 🖥️ **Headless Chrome Browser**: Uses Chrome in headless mode for faster and seamless scraping.
+- ⌛ **Get elements with explicit waits**: Class method with the possibility of explicit waits, so you can wait for elements to fully load before interaction.
 
 ---
 
