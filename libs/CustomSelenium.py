@@ -89,6 +89,9 @@ class CustomSelenium:
         # ElementClickInterceptedException, ElementNotInteractableException
         self.set_implicit_wait(self.implicit_wait)
 
+        # Changes 'webdriver' variable to undefined to avoid detection by websites
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
 
     def set_page_size(self, width: int, height: int):
         """
