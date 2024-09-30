@@ -93,6 +93,7 @@ class NewsScraper(CustomSelenium):
             self.logger.info(f"Created output folder: {self.output_dir}")
 
         self.set_webdriver(browser)
+        self.set_page_size(1920, 1080)  # Set the window size to 1920x1080
 
 
     def access_home_page(self, url: str = "https://www.aljazeera.com/", screenshot: str = None):
