@@ -105,7 +105,7 @@ class CustomSelenium:
         current_window_size = self.driver.get_window_size()
 
         # Extract the client window size from the html tag
-        html = self.driver.find_element_by_tag_name("html")
+        html = self.driver.find_element(By.TAG_NAME, "html")
         inner_width = int(html.get_attribute("clientWidth"))
         inner_height = int(html.get_attribute("clientHeight"))
 
