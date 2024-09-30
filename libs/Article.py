@@ -131,7 +131,7 @@ class Article:
 
         image_url = image_element.get_attribute("src")
         image_name = image_url.split("?q=tbn:")[1].split("&")[0]
-        image_file_name = f"{image_name}.png"
+        image_file_name = f"{image_name}.jpeg"
         return image_url, image_file_name
 
 
