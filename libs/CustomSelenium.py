@@ -3,6 +3,7 @@ import logging
 from selenium import webdriver
 from pathlib import Path
 from RPA.core.webdriver import start
+from selenium.webdriver.common.by import By
 
 
 class CustomSelenium:
@@ -56,8 +57,11 @@ class CustomSelenium:
         options.add_argument("--disable-gpu")  # applicable to windows os only
         options.add_argument("--disable-web-security")  # Disable web security
         options.add_argument("--start-maximized")  # Start maximized
-        options.add_argument("--remote-debugging-port=9222")  # Debugging port
         options.add_argument(f"--user-agent={self.user_agent}")  # Set user agent
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
+        options.add_experimental_option("useAutomationExtension", False)
+        options.add_argument("--disable-dev-shm-usage")
         return options
 
 
