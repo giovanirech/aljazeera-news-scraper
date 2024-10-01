@@ -6,7 +6,7 @@ from pathlib import Path
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
-
+from pandas import Timestamp
 
 class Article:
     """
@@ -130,7 +130,7 @@ class Article:
             return None, None
 
         image_url = image_element.get_attribute("src")
-        image_name = image_url.split("?q=tbn:")[1].split("&")[0]
+        image_name = str(Timestamp.now().timestamp()).replace(".", "_")
         image_file_name = f"{image_name}.jpeg"
         return image_url, image_file_name
 
