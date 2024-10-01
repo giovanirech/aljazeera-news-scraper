@@ -291,7 +291,7 @@ class NewsScraper(CustomSelenium):
         Archives the output directory containing the collected articles and images into a ZIP file.
         """
         zip_path = make_archive(self.output_dir, "zip", self.output_dir)
-        self.logger.info(f"Collection archived to {zip_path}.zip")
+        self.logger.info(f"Collection archived to {zip_path}")
 
     def _get_web_element(
         self,
